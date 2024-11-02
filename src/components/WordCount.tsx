@@ -69,17 +69,28 @@ export default function WordCount() {
         const text = Array.from(xmlDoc.getElementsByTagName("w:t"))
             .map(node => node.textContent)
             .join(" ");
-        return text;
+        return text.normalize("NFC");
     };
 
     const countWords = (text: string): Record<string, number> => {
-        const words = text.match(/\b[\p{L}]+\b/gu) || [];
+        const words = text
+            .split(/\s+/)
+            .filter(word => /\p{L}/u.test(word));
+    
         return words.reduce((acc: Record<string, number>, word: string) => {
-            const normalizedWord = word.toLowerCase();
+            const normalizedWord = normalizeWord(word);
             acc[normalizedWord] = (acc[normalizedWord] || 0) + 1;
             return acc;
         }, {});
     };
+    
+    const normalizeWord = (word: string): string => {
+        return word
+            .normalize("NFC")
+            .toLocaleLowerCase('tr-TR');
+    };
+     
+      
 
     const getTotalWords = (wordCounts: Record<string, number>): number => {
         return Object.values(wordCounts).reduce((sum, count) => sum + count, 0);
@@ -177,18 +188,33 @@ export default function WordCount() {
             {results.length > 0 && (
                 <div className="mt-6">
                     {results.map((result, index) => (
-                        <div key={index} className="mb-4 text-gray-700">
-                            <h2 className="font-semibold text-lg">{result.fileName}</h2>
-                            <p>Total Words: {result.totalWords}</p>
-                            <ul className="list-[circle] ml-5 flex flex-wrap gap-x-12 justify-between">
-                                {Object.entries(result.wordCounts).map(([word, count]) => (
-                                    <li key={word}>{word}: {count}</li>
-                                ))}
-                            </ul>
+                        <div key={index} className="mb-8 text-gray-700">
+                            <h2 className="font-semibold text-lg mb-2">{result.fileName}</h2>
+                            <p className="mb-4">Total Words: {result.totalWords}</p>
+
+                            <div className="overflow-auto">
+                                <table className="min-w-full bg-white border border-gray-300">
+                                    <thead>
+                                        <tr>
+                                            <th className="px-4 py-2 bg-gray-200 text-left font-semibold">Word</th>
+                                            <th className="px-4 py-2 bg-gray-200 text-left font-semibold">Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {Object.entries(result.wordCounts).map(([word, count]) => (
+                                            <tr key={word} className="border-b border-gray-300">
+                                                <td className="px-4 py-2">{word}</td>
+                                                <td className="px-4 py-2 font-bold">{count}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     ))}
                 </div>
             )}
+
         </div>
     )
 }
