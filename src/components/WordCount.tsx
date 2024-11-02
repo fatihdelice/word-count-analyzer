@@ -87,8 +87,9 @@ export default function WordCount() {
     const normalizeWord = (word: string): string => {
         return word
             .normalize("NFC")
-            .toLocaleLowerCase('tr-TR');
+            .toLocaleLowerCase('en-US');
     };
+    
      
       
 
