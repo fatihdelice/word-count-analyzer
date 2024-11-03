@@ -139,7 +139,7 @@ export default function WordCount() {
                         value={textInput}
                         onChange={handleTextChange}
                         rows={7}
-                        placeholder="Metin girin..."
+                        placeholder="Enter text..."
                         className="mr-4 mb-4 w-full px-4 py-2 border rounded-md text-gray-700"
                     />
                 )}
