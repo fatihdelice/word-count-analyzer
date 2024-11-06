@@ -7,6 +7,7 @@ interface WordCountResult {
     fileName: string;
     wordCounts: Record<string, number>;
     totalWords: number;
+    totalChars: number;
 }
 
 
@@ -26,7 +27,7 @@ export default function WordCount() {
             uploadedFiles.map(async (file) => {
                 const text = await extractTextFromDocx(file);
                 const wordCounts = countWords(text);
-                return { fileName: file.name, wordCounts, totalWords: getTotalWords(wordCounts) };
+                return { fileName: file.name, wordCounts, totalWords: getTotalWords(wordCounts), totalChars: getTotalCharacters(text)  };
             })
         );
 
@@ -40,9 +41,10 @@ export default function WordCount() {
     const handleAnalyzeText = () => {
         const wordCounts = countWords(textInput);
         const totalWords = getTotalWords(wordCounts);
-        const result: WordCountResult = { fileName: 'Input Text', wordCounts, totalWords };
+        const totalChars = getTotalCharacters(textInput);
+        const result: WordCountResult = { fileName: 'Input Text', wordCounts, totalWords, totalChars };
 
-        setResults((prevResults) => [...prevResults, result]);
+        setResults([result]);
     };
 
     const handleTabChange = (tab: 'upload' | 'text') => {
@@ -89,12 +91,13 @@ export default function WordCount() {
             .normalize("NFC")
             .toLocaleLowerCase('en-US');
     };
-    
-     
-      
 
     const getTotalWords = (wordCounts: Record<string, number>): number => {
         return Object.values(wordCounts).reduce((sum, count) => sum + count, 0);
+    };
+
+    const getTotalCharacters = (text: string): number => {
+        return text.length;
     };
 
     const downloadResults = () => {
@@ -103,6 +106,7 @@ export default function WordCount() {
                 children: [
                     new Paragraph({ text: `File: ${result.fileName}`, heading: 'Heading1' }),
                     new Paragraph({ text: `Total Words: ${result.totalWords}`, spacing: { after: 200 } }),
+                    new Paragraph({ text: `Total Characters: ${result.totalChars}`, spacing: { after: 200 } }),
                     ...Object.entries(result.wordCounts).map(
                         ([word, count]) => new Paragraph(`${word}: ${count}`)
                     ),
@@ -192,6 +196,7 @@ export default function WordCount() {
                         <div key={index} className="mb-8 text-gray-700">
                             <h2 className="font-semibold text-lg mb-2">{result.fileName}</h2>
                             <p className="mb-4">Total Words: {result.totalWords}</p>
+                            <p className="mb-4">Total Characters: {result.totalChars}</p>
 
                             <div className="overflow-auto">
                                 <table className="min-w-full bg-white border border-gray-300">
